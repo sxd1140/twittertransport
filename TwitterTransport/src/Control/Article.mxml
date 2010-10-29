@@ -1,0 +1,100 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<s:Group xmlns:fx = "http://ns.adobe.com/mxml/2009"
+		 xmlns:s = "library://ns.adobe.com/flex/spark"
+		 xmlns:mx = "library://ns.adobe.com/flex/mx"
+		 width = "100%"
+		 height = "100%">
+	<s:layout>
+		<s:BasicLayout   />
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import Class.content;
+
+			import mx.utils.StringUtil;
+
+			[Bindable]
+			public var BackgroupColor:uint = 0xFFFFFF;
+
+			public function set Twitter(twitter:content):void
+			{
+				txtMainText.htmlText = formatString(twitter.ArticleContent);
+			}
+
+			private function formatString(content:String):String
+			{
+				var ret:String;
+				var reg:RegExp;
+				ret = StringUtil.trim(content);
+
+				//特殊字符转换
+				reg = /\</g;
+				ret = ret.replace(reg, "&lt;");
+
+				//链接可点
+				reg = /http:\/\/\S*(\s|$)/g;
+				ret = ret.replace(reg, '<font color="#0000FF"><a href="$&" target="_blank">$&</a></font>');
+
+				//@xxx yyy
+				//@xxx: yyy
+				//@xxx:yyy 着色
+				reg = /@\S+?(?=[\:\s])/;
+				ret = ret.replace(reg, '<b><font color="#FF0000">$&</font></b>');
+				return ret;
+			}
+
+			protected function txtMainText_mouseWheelHandler(event:MouseEvent):void
+			{
+				dispatchEvent(event);
+			}
+
+//			protected function txtMainText_rollOverHandler(event:MouseEvent):void
+//			{
+//				if (!(event.relatedObject is Button) || !aniMove.isPlaying)
+//				{
+//					aniMove.play();
+//				}
+//			}
+//
+//			protected function txtMainText_rollOutHandler(event:MouseEvent):void
+//			{
+//				if (!(event.relatedObject is Button))
+//				{
+//					aniMove.play(null, true);
+//				}
+////				boxToolBar.visible = false;
+//			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!--<s:Parallel id = "aniMove"
+			 target = "{boxToolBar}"
+			 duration = "500">
+			 <s:Move yFrom = "-30"
+			 yTo = "{boxFull.height/2}"   />
+			 <s:Fade alphaFrom = "0"
+			 alphaTo = "1"   />
+			 </s:Parallel>-->
+	</fx:Declarations>
+	<mx:TextArea id = "txtMainText"
+				 width = "100%"
+				 height = "100%"
+				 contentBackgroundColor = "{BackgroupColor}"
+				 borderVisible = "false"
+				 editable = "false"
+				 mouseWheel = "txtMainText_mouseWheelHandler(event)"   />
+	<!-- rollOver = "txtMainText_rollOverHandler(event)"
+		 rollOut = "txtMainText_rollOutHandler(event)" -->
+	<!--<s:Group id = "boxFull"
+		 width = "100%">
+		 <s:HGroup id = "boxToolBar"
+		 x = "{boxFull.width/2}"
+		 y = "-30"
+		 visible = "false">
+		 <s:Button id = "btnComment"
+		 label = "评论"   />
+		 <s:Button id = "btnDelete"
+		 label = "删除"   />
+		 </s:HGroup>
+		 </s:Group>-->
+</s:Group>

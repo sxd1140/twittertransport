@@ -1,0 +1,24 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<s:TitleWindow xmlns:fx = "http://ns.adobe.com/mxml/2009"
+			   xmlns:s = "library://ns.adobe.com/flex/spark"
+			   xmlns:mx = "library://ns.adobe.com/flex/mx"
+			   width = "100%"
+			   height = "100%"
+			   skinClass = "Skins.TitleWindowSkin">
+	<s:layout>
+		<s:BasicLayout   />
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import Skins.TitleWindowSkin;
+
+			import spark.components.Button;
+
+			[SkinPart(required="true")]
+			public var btnOption:spark.components.Button;
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+</s:TitleWindow>

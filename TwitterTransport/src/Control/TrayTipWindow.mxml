@@ -1,0 +1,96 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<s:Window xmlns:fx = "http://ns.adobe.com/mxml/2009"
+		  xmlns:s = "library://ns.adobe.com/flex/spark"
+		  xmlns:mx = "library://ns.adobe.com/flex/mx"
+		  width = "300"
+		  height = "100"
+		  showStatusBar = "false"
+		  systemChrome = "{NativeWindowSystemChrome.NONE}"
+		  transparent = "true"
+		  alwaysInFront = "true"
+		  type = "{NativeWindowType.LIGHTWEIGHT}"
+		  creationComplete = "window1_creationCompleteHandler(event)"
+		  xmlns:Control = "Control.*">
+	<s:layout>
+		<s:BasicLayout   />
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import Class.Options;
+			import Class.content;
+
+			import mx.events.EffectEvent;
+			import mx.events.FlexEvent;
+
+			private var _twitter:content;
+
+			protected function window1_creationCompleteHandler(event:FlexEvent):void
+			{
+				nativeWindow.x = Capabilities.screenResolutionX - this.width - 10;
+				nativeWindow.y = Screen.mainScreen.visibleBounds.height - this.height;
+				aniMoveUp.play();
+				var timer:Timer = new Timer(Options.TipWindowShowTime * 1000, 1);
+				timer.addEventListener(TimerEvent.TIMER, OnTimer_handler);
+				timer.start();
+			}
+
+			public function set Twitter(twitter:content):void
+			{
+				_twitter = twitter;
+			}
+
+			private function OnTimer_handler(event:TimerEvent):void
+			{
+				event.currentTarget.stop();
+				aniFade.play();
+			}
+
+			protected function aniFade_effectEndHandler(event:EffectEvent):void
+			{
+				this.close();
+			}
+
+			protected function btnClose_clickHandler(event:MouseEvent):void
+			{
+				this.close();
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:Move id = "aniMoveUp"
+				target = "{this}"
+				duration = "1000"
+				yFrom = "100"
+				yTo = "0"   />
+		<s:Fade id = "aniFade"
+				target = "{this}"
+				duration = "2000"
+				alphaFrom = "1"
+				alphaTo = "0"
+				effectEnd = "aniFade_effectEndHandler(event)"   />
+	</fx:Declarations>
+	<!--<s:TitleWindow id = "titleTrayTip"
+		 title = "有新货搬运来了"
+		 width = "100%"
+		 height = "100%">-->
+	<s:BorderContainer width = "100%"
+					   height = "100%">
+		<s:layout>
+			<s:VerticalLayout paddingLeft = "5"
+							  paddingTop = "5"
+							  paddingRight = "5"
+							  paddingBottom = "5"
+							  gap = "0"   />
+		</s:layout>
+		<s:Group width = "100%">
+			<mx:LinkButton id = "btnClose"
+						   label = "x"
+						   right = "5"
+						   click = "btnClose_clickHandler(event)"   />
+		</s:Group>
+		<Control:Article id = "article"
+						 width = "100%"
+						 Twitter = "{_twitter}"   />
+	</s:BorderContainer>
+	<!--</s:TitleWindow>-->
+</s:Window>
