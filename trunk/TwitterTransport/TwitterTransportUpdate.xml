@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>    
+<update xmlns="http://ns.adobe.com/air/framework/update/description/1.0">    
+     <version>v1.10</version>    
+     <url>http://sxd.zoomshare.com/files/TwitterTransport.air</url>    
+<description>
+<text xml:lang="zh_CN">
+v1.01 修改"获取更多"按钮样式
+v1.02 修改获取消息时间为15秒
+v1.03 修改一套图标
+v1.04 增加可调节大小,下一版本增加边界鼠标样式改变
+v1.05 增加一些效果
+v1.06 去掉了开始动画
+v1.07 修正滚动条无法拖动的bug
+v1.08 增加移动时窗体透明的渐变效果
+v1.09 增加右下角小窗提示 默认显示10秒
+v1.10 增加设置窗口,增加小窗提示关闭按钮
+</text>
+</description>    
+</update>    

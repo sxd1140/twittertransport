@@ -1,0 +1,434 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<s:WindowedApplication xmlns:fx = "http://ns.adobe.com/mxml/2009"
+					   xmlns:s = "library://ns.adobe.com/flex/spark"
+					   xmlns:mx = "library://ns.adobe.com/flex/mx"
+					   width = "590"
+					   height = "630"
+					   creationComplete = "init()"
+					   showStatusBar = "false"
+					   xmlns:Control = "Control.*">
+	<fx:Script>
+		<![CDATA[
+			import Class.DataEvents;
+			import Class.General;
+			import Class.Options;
+			import Class.content;
+
+			import Control.Article;
+			import Control.OptionsWindow;
+			import Control.TrayTipWindow;
+
+			import air.update.ApplicationUpdaterUI;
+			import air.update.events.UpdateEvent;
+
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.HRule;
+			import mx.events.CloseEvent;
+			import mx.events.DragEvent;
+			import mx.events.EffectEvent;
+			import mx.managers.PopUpManager;
+
+			import spark.components.Group;
+			import spark.effects.easing.Bounce;
+
+			private var _currentOffset:int = 11;
+			private var _colorBoolean:Boolean = true;
+			private var _resizeOffset:int = 5;
+
+			private var app:content = new content;
+			private var CurrentTwitter:content;
+			private var PrevTwitter:content;
+			private var MySO:SharedObject;
+
+			private var appUpdater:ApplicationUpdaterUI = new ApplicationUpdaterUI;
+			private var trayTipWindows:TrayTipWindow;
+			private var optionWindow:OptionsWindow;
+
+			private var GetTwitterTimer:Timer = new Timer(Options.AutoRefreshTime * 1000);
+
+			[Embed(source='assets/icon16.png')]
+			private var trayIcon:Class;
+
+			protected function init():void
+			{
+				nativeWindow.x = (Capabilities.screenResolutionX - nativeWindow.width) / 2;
+				nativeWindow.y = (Capabilities.screenResolutionY - nativeWindow.height) / 2;
+
+				nativeApplication.icon.bitmaps = [new trayIcon];
+
+				app.addEventListener("GetAllListCompleted", OnGetAllListCompleted_handler);
+//				app.addEventListener("AddTwitterSuccess", OnAddTwitterSuccess_handler);
+//				app.addEventListener("AddTwitterFaild", OnAddTwitterFaild_handler);
+				app.getTwitter();
+
+				GetTwitterTimer.addEventListener(TimerEvent.TIMER, OnTimer_handler);
+
+				titleAll.addEventListener(CloseEvent.CLOSE, OnTitleAllClosed_handler);
+				titleAll.addEventListener(MouseEvent.MOUSE_DOWN, OnTitleAllMouseDown_handler);
+				titleAll.addEventListener(MouseEvent.MOUSE_UP, OnTitleAllMouseUp_handler);
+				titleAll.btnOption.addEventListener(MouseEvent.CLICK, OnOptionButtonClick_handler);
+
+				loadOptionsFromLSO();
+
+				checkForUpdate();
+			}
+
+			//关闭事件
+			private function OnTitleAllClosed_handler(event:CloseEvent):void
+			{
+				aniClose.play();
+			}
+
+			//鼠标按下
+			private function OnTitleAllMouseDown_handler(event:MouseEvent):void
+			{
+				if (event.target is Group && event.target.id == "moveArea")
+				{
+					nativeWindow.startMove();
+					aniMove.play();
+					return;
+				}
+
+				if (event.target is LinkButton || event.target is Button)
+				{
+					return;
+				}
+
+				var x:int = event.localX;
+				var y:int = event.localY;
+
+//				if (x < _resizeOffset && y < _resizeOffset)
+//				{
+//					nativeWindow.startResize(NativeWindowResize.TOP_LEFT);
+//					return;
+//				}
+//				if (x > titleAll.width - _resizeOffset && y < _resizeOffset)
+//				{
+//					nativeWindow.startResize(NativeWindowResize.TOP_RIGHT);
+//					return;
+//				}
+				if (x > titleAll.width - _resizeOffset && y > titleAll.height - 50)
+				{
+					nativeWindow.startResize(NativeWindowResize.BOTTOM_RIGHT);
+					return;
+				}
+				if (x < _resizeOffset && y > titleAll.height - 50)
+				{
+					nativeWindow.startResize(NativeWindowResize.BOTTOM_LEFT);
+					return;
+				}
+				if (x < _resizeOffset)
+				{
+					nativeWindow.startResize(NativeWindowResize.LEFT);
+					return;
+				}
+//				if (y < _resizeOffset)
+//				{
+//					nativeWindow.startResize(NativeWindowResize.TOP);
+//					return;
+//				}
+				if (x > titleAll.width - _resizeOffset)
+				{
+					nativeWindow.startResize(NativeWindowResize.RIGHT);
+					return;
+				}
+				if (y > titleAll.height - 50)
+				{
+					nativeWindow.startResize(NativeWindowResize.BOTTOM);
+					return;
+				}
+
+			}
+
+			//鼠标抬起
+			private function OnTitleAllMouseUp_handler(event:MouseEvent):void
+			{
+				if (event.target is Group && event.target.id == "moveArea")
+				{
+					aniMove.play(null, true);
+				}
+			}
+
+			//获取数据返回
+			private function OnGetAllListCompleted_handler(e:DataEvents):void
+			{
+				var allTwitter:ArrayCollection = e.result as ArrayCollection;
+				var allTwitterLength:int = allTwitter.length;
+				if (allTwitterLength > 1)
+				{
+					TwitterAddToUI(allTwitter);
+					PrevTwitter = allTwitter[0];
+					GetTwitterTimer.start();
+				}
+				else if (allTwitterLength == 1)
+				{
+					CurrentTwitter = allTwitter[0];
+					if (CurrentTwitter.ArticleID > PrevTwitter.ArticleID)
+					{
+						TwitterAddToUI(allTwitter);
+						PrevTwitter = CurrentTwitter;
+						trayTipWindows = new TrayTipWindow;
+						trayTipWindows.Twitter = allTwitter[0];
+						trayTipWindows.open();
+					}
+				}
+			}
+
+//			protected function btnAdd_clickHandler(event:MouseEvent):void
+//			{
+//				if (txtInput.text == "")
+//					return;
+//				btnAdd.enabled = false;
+//				GetTwitterTimer.stop();
+//				app.AddTwitter(replaceSymbol(txtInput.text));
+//			}
+
+//			protected function btnPaste_clickHandler(event:MouseEvent):void
+//			{
+//				txtInput.text = ExternalInterface.call("getClipData");
+//			}
+
+//			private function OnAddTwitterSuccess_handler(e:Event):void
+//			{
+//				btnAdd.enabled = true;
+//				txtInput.text = "";
+//				OnTimer_handler(null);
+//				GetTwitterTimer.start();
+//			}
+
+//			private function OnAddTwitterFaild_handler(e:Event):void
+//			{
+//
+//			}
+
+//			private function replaceSymbol(content:String):String
+//			{
+//				var reg:RegExp = /"/g;
+//				return content.replace(reg, '\\"');
+//			}
+			//自动刷新
+			private function OnTimer_handler(e:TimerEvent):void
+			{
+				GetTwitterTimer.delay = Options.AutoRefreshTime * 1000;
+				app.getTwitter(0, 1);
+			}
+
+//			protected function txtInput_keyUpHandler(event:KeyboardEvent):void
+//			{
+//				if (event.ctrlKey && event.keyCode == Keyboard.ENTER)
+//				{
+//					btnAdd_clickHandler(null);
+//				}
+//			}
+			//获取更多按钮点击
+			protected function btnGetMore_clickHandler(event:MouseEvent):void
+			{
+				btnGetMore.enabled = false;
+				var more:content = new content;
+				more.addEventListener("GetAllListCompleted", OnGetMoreTwitterCompleted_handler);
+				more.getTwitter(_currentOffset);
+			}
+
+			//获取更多返回
+			private function OnGetMoreTwitterCompleted_handler(event:DataEvents):void
+			{
+				var data:ArrayCollection = event.result as ArrayCollection;
+				if (data.length > 0)
+				{
+					TwitterAddToUI(data);
+					_currentOffset += 10;
+				}
+				btnGetMore.enabled = true;
+			}
+
+			//设置按钮点击
+			private function OnOptionButtonClick_handler(event:MouseEvent):void
+			{
+				optionWindow = PopUpManager.createPopUp(this, OptionsWindow, true) as OptionsWindow;
+				optionWindow.addEventListener("OptionsSave", onOptionsSave);
+				PopUpManager.centerPopUp(optionWindow);
+			}
+
+			//设置保存
+			private function onOptionsSave(event:Event):void
+			{
+				var twitterLength:int = boxMain.numElements;
+				for (var i:int = 0; i < twitterLength; i++)
+				{
+					var element:Article = boxMain.getElementAt(i) as Article;
+					if (element && element.BackgroupColor != Options.GapColor && element.BackgroupColor != 0xFFFFFF)
+					{
+						element.BackgroupColor = Options.GapColor;
+					}
+				}
+				saveOptionsToLSO();
+			}
+
+			//把内容写到界面中
+			private function TwitterAddToUI(val:ArrayCollection):void
+			{
+				var valLength:int = val.length;
+				for (var i:int = 0; i < valLength; i++)
+				{
+					var article:Article = new Article;
+					article.Twitter = val[i];
+					if (_colorBoolean)
+					{
+						article.BackgroupColor = Options.GapColor;
+					}
+					_colorBoolean = !_colorBoolean;
+
+					if (valLength == 1)
+					{
+						boxMain.addElementAt(article, 0);
+						AddLineToUI(true);
+						return;
+					}
+					else
+					{
+						boxMain.addElement(article);
+					}
+				}
+				AddLineToUI();
+			}
+
+			private function AddLineToUI(UP:Boolean = false):void
+			{
+				var line:HRule = new HRule;
+				line.percentWidth = 100;
+				line.setStyle("strokeColor", 0xFF0000);
+				if (UP)
+				{
+					boxMain.addElementAt(line, 1);
+				}
+				else
+				{
+					boxMain.addElement(line);
+				}
+			}
+
+			//读取设置
+			private function loadOptionsFromLSO():void
+			{
+				MySO = SharedObject.getLocal("TwitterTransportOptions");
+				if (MySO.data.AutoRefreshTime == undefined)
+				{
+					Options.AutoRefreshTime = 15;
+					Options.GapColor = 0xAEAEAE;
+					Options.TipWindowShowTime = 10;
+				}
+				else
+				{
+					Options.AutoRefreshTime = MySO.data.AutoRefreshTime;
+					Options.GapColor = MySO.data.GapColor;
+					Options.TipWindowShowTime = MySO.data.TipWindowShowTime;
+				}
+			}
+
+			//保存设置
+			private function saveOptionsToLSO():void
+			{
+				MySO = SharedObject.getLocal("TwitterTransportOptions");
+				MySO.data.AutoRefreshTime = Options.AutoRefreshTime;
+				MySO.data.GapColor = Options.GapColor;
+				MySO.data.TipWindowShowTime = Options.TipWindowShowTime;
+			}
+
+			private function checkForUpdate():void
+			{
+				appUpdater.updateURL = "http://www.sunwenhao.com/TwitterTransportUpdate.xml"; // Server-side XML file describing update   
+				appUpdater.isCheckForUpdateVisible = false; // We won't ask permission to check for an update   
+				appUpdater.addEventListener(UpdateEvent.INITIALIZED, onUpdate); // Once initialized, run onUpdate   
+				appUpdater.addEventListener(ErrorEvent.ERROR, onError); // If something goes wrong, run onError   
+				appUpdater.initialize(); // Initialize the update framework   
+			}
+
+			private function onError(event:ErrorEvent):void
+			{
+				Alert.show(event.toString());
+			}
+
+			private function onUpdate(event:UpdateEvent):void
+			{
+				appUpdater.checkNow(); // Go check for an update now   
+			}
+
+			//关闭效果结束后
+			protected function aniClose_effectEndHandler(event:EffectEvent):void
+			{
+				nativeApplication.exit();
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!--窗口拖动动画-->
+		<s:Fade id = "aniMove"
+				target = "{this}"
+				duration = "300"
+				alphaFrom = "1"
+				alphaTo = "0.5"   />
+		<!--关闭动画-->
+		<s:Parallel id = "aniClose"
+					target = "{this}"
+					duration = "1000"
+					effectEnd = "aniClose_effectEndHandler(event)">
+			<s:Rotate3D id = "aniRotate3D"
+						angleYFrom = "0"
+						angleYTo = "360"
+						autoCenterTransform = "true"   />
+			<s:Scale scaleXFrom = "1"
+					 scaleXTo = "0"
+					 scaleYFrom = "1"
+					 scaleYTo = "0"   />
+		</s:Parallel>
+
+	</fx:Declarations>
+	<Control:MainWindow id = "titleAll"
+						width = "100%"
+						height = "100%"
+						title = "Sxd的搬运集散地">
+
+
+		<s:Scroller width = "100%"
+					height = "100%">
+			<s:VGroup width = "100%"
+					  height = "100%">
+				<s:HGroup paddingTop = "10"
+						  paddingLeft = "50"
+						  includeInLayout = "false"
+						  visible = "false">
+					<mx:TextArea id = "txtInput"
+								 width = "400"
+								 height = "100"   />
+					<s:VGroup height = "100%"
+							  verticalAlign = "bottom">
+						<s:Button id = "btnPaste"
+								  label = "粘贴"
+								  visible = "false"
+								  includeInLayout = "false"   />
+						<s:Button id = "btnAdd"
+								  label = "发言"   />
+					</s:VGroup>
+					<s:Label fontSize = "13"
+							 text = "ctrl + 回车 发言,没什么人聊天 获取消息间隔时间改回30秒,增加发推人id着色,链接可点 着色"   />
+				</s:HGroup>
+				<s:VGroup id = "boxMain"
+						  width = "100%"   />
+				<s:VGroup width = "100%"
+						  horizontalAlign = "center">
+					<mx:ProgressBar id = "loadingBar"
+									indeterminate = "true"
+									visible = "{!btnGetMore.enabled}"   />
+					<mx:LinkButton id = "btnGetMore"
+								   label = "获取更多"
+								   width = "150"
+								   height = "30"
+								   fontSize = "19"
+								   fontWeight = "bold"
+								   click = "btnGetMore_clickHandler(event)"   />
+				</s:VGroup>
+			</s:VGroup>
+		</s:Scroller>
+	</Control:MainWindow>
+</s:WindowedApplication>

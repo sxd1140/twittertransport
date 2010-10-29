@@ -1,0 +1,75 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<s:BorderContainer xmlns:fx = "http://ns.adobe.com/mxml/2009"
+				   xmlns:s = "library://ns.adobe.com/flex/spark"
+				   xmlns:mx = "library://ns.adobe.com/flex/mx"
+				   cornerRadius = "5">
+	<s:layout>
+		<s:BasicLayout   />
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import Class.Options;
+
+			import mx.managers.PopUpManager;
+
+			public var CurrentOptions:Options;
+
+			protected function btnSave_clickHandler(event:MouseEvent):void
+			{
+				Options.AutoRefreshTime = tiAutoRefreshTime.text == "" ? Options.AutoRefreshTime : int(tiAutoRefreshTime.text);
+				Options.GapColor = cpGapColor.selectedColor;
+				Options.TipWindowShowTime = nsTipWindowShowTime.value;
+				dispatchEvent(new Event("OptionsSave"));
+				btnClose_clickHandler(null);
+			}
+
+			protected function btnClose_clickHandler(event:MouseEvent):void
+			{
+				if (isPopUp)
+				{
+					PopUpManager.removePopUp(this);
+				}
+				else
+				{
+					visible = false;
+				}
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:VGroup width = "100%"
+			  horizontalAlign = "center"
+			  paddingBottom = "15">
+
+		<mx:Form>
+			<mx:FormItem label = "自动刷新时间:">
+				<s:TextInput id = "tiAutoRefreshTime"
+							 restrict = "0-9"
+							 maxChars = "2"
+							 text = "{Options.AutoRefreshTime}"   />
+			</mx:FormItem>
+			<mx:FormItem label = "间隔颜色:">
+				<mx:ColorPicker id = "cpGapColor"
+								selectedColor = "{Options.GapColor}"   />
+			</mx:FormItem>
+			<mx:FormItem label = "小窗停留时间:">
+				<s:NumericStepper id = "nsTipWindowShowTime"
+								  minimum = "5"
+								  maximum = "30"
+								  snapInterval = "5"
+								  value = "{Options.TipWindowShowTime}"   />
+			</mx:FormItem>
+		</mx:Form>
+		<s:HGroup width = "100%"
+				  horizontalAlign = "center">
+			<s:Button id = "btnSave"
+					  label = "保存"
+					  click = "btnSave_clickHandler(event)"   />
+			<s:Button id = "btnClose"
+					  label = "关闭"
+					  click = "btnClose_clickHandler(event)"   />
+		</s:HGroup>
+	</s:VGroup>
+</s:BorderContainer>
