@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>    
 <update xmlns="http://ns.adobe.com/air/framework/update/description/1.0">    
-     <version>v1.10</version>    
+     <version>v1.22</version>    
      <url>http://sxd.zoomshare.com/files/TwitterTransport.air</url>    
 <description>
 <text xml:lang="zh_CN">
@@ -14,6 +14,9 @@ v1.07 修正滚动条无法拖动的bug
 v1.08 增加移动时窗体透明的渐变效果
 v1.09 增加右下角小窗提示 默认显示10秒
 v1.10 增加设置窗口,增加小窗提示关闭按钮
+v1.20 改进更新机制,不会丢消息了,增加背景sb效果(下个版本改回),增加失败的mini模式
+v1.21 暂时去掉"获取更多"按钮,增加最小化,置顶按钮,去掉mini模式按钮,bug修复
+v1.22 恢复原始背景,去掉窗口边框,修正中文冒号正则
 </text>
 </description>    
 </update>    
