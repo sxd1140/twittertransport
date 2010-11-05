@@ -29,7 +29,8 @@
 			 minWidth = "76"
 			 minHeight = "76"
 			 alpha.disabled = "0.5"
-			 alpha.disabledWithControlBar = "0.5">
+			 alpha.disabledWithControlBar = "0.5"
+			 xmlns:mx = "library://ns.adobe.com/flex/mx">
 
 	<fx:Metadata>
 		<![CDATA[ 
@@ -45,7 +46,7 @@
 	<fx:Script fb:purpose = "styling">
 		/* Define the skin elements that should not be colorized.
 		 For panel, border and title background are skinned, but the content area and title text are not. */
-		static private const exclusions:Array = ["background", "titleDisplay", "btnOption","contentGroup"];
+		static private const exclusions:Array = ["background", "titleDisplay", "btnOption", "contentGroup"];
 
 		/**
 		 * @private
@@ -125,7 +126,6 @@
 
 		private var cornerRadius:Number;
 	</fx:Script>
-
 	<s:states>
 		<s:State name = "normal"   />
 		<s:State name = "inactive"
@@ -166,12 +166,14 @@
 				 right = "1"
 				 bottom = "1"
 				 id = "topGroupMask">
+
 			<!--- @private-->
 			<s:Rect id = "topMaskRect"
 					left = "0"
 					top = "0"
 					right = "0"
 					bottom = "0">
+
 				<s:fill>
 					<s:SolidColor alpha = "0"   />
 				</s:fill>
@@ -217,12 +219,29 @@
 				top = "1"
 				right = "1"
 				bottom = "1">
+
 			<s:fill>
 				<!--- Defines the TitleWindowSkin class's background fill. The default color is 0xFFFFFF. -->
 				<s:SolidColor id = "backgroundFill"
 							  color = "#FFFFFF"   />
 			</s:fill>
 		</s:Rect>
+
+		<!--<s:BorderContainer id = "glassLayer"
+			 left = "1"
+			 top = "1"
+			 right = "1"
+			 bottom = "1"
+			 borderVisible = "false">
+			 <s:filters>
+			 <s:GlowFilter blurX = "500"
+			 blurY = "500"
+			 color = "0xFFFFFF"
+			 inner = "true"   />
+			 <s:BlurFilter blurX = "500"
+			 blurY = "500"   />
+			 </s:filters>
+			 </s:BorderContainer>-->
 
 		<!-- layer 3: contents -->
 		<!--- Contains the vertical stack of title bar content and control bar. -->
@@ -314,21 +333,33 @@
 						 right = "0"
 						 top = "0"
 						 bottom = "0"   />
-				<!--- @copy spark.components.TitleWindow#btnOption -->
-				<s:Button id = "btnOption"
-						  x = "{closeButton.x-btnOption.width-5}"
-						  y = "{closeButton.y-5}"
-						  width = "24"
-						  height = "24"
-						  skinClass = "Skins.OptionButtonSkin"
-						  buttonMode = "true"   />
-				<!--- @copy spark.components.TitleWindow#closeButton -->
-				<s:Button id = "closeButton"
-						  skinClass = "spark.skins.spark.TitleWindowCloseButtonSkin"
-						  width = "15"
-						  height = "15"
-						  right = "7"
-						  top = "7"   />
+
+				<s:HGroup right = "7"
+						  top = "3"
+						  verticalAlign = "middle">
+					<s:Label id = "btnMiniMode"
+							 text = "Mini"
+							 buttonMode = "true"
+							 includeInLayout = "false"
+							 visible = "false"   />
+					<s:Label id = "btnOnTopAlways"
+							 text = "OnTop"
+							 buttonMode = "true"   />
+					<s:Label id = "btnMin"
+							 text = "Min"
+							 buttonMode = "true"   />
+					<!--- @copy spark.components.TitleWindow#btnOption -->
+					<s:Button id = "btnOption"
+							  width = "24"
+							  height = "24"
+							  skinClass = "Skins.OptionButtonSkin"
+							  buttonMode = "true"   />
+					<!--- @copy spark.components.TitleWindow#closeButton -->
+					<s:Button id = "closeButton"
+							  skinClass = "spark.skins.spark.TitleWindowCloseButtonSkin"
+							  width = "15"
+							  height = "15"   />
+				</s:HGroup>
 			</s:Group>
 
 			<!--

@@ -38,7 +38,7 @@
 				//@xxx yyy
 				//@xxx: yyy
 				//@xxx:yyy 着色
-				reg = /@\S+?(?=[\:\s])/;
+				reg = /@\S+?(?=[\:\：\s])/;
 				ret = ret.replace(reg, '<b><font color="#FF0000">$&</font></b>');
 				return ret;
 			}

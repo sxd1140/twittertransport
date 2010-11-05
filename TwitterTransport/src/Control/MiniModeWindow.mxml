@@ -1,0 +1,56 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<s:Group xmlns:fx = "http://ns.adobe.com/mxml/2009"
+		 xmlns:s = "library://ns.adobe.com/flex/spark"
+		 xmlns:mx = "library://ns.adobe.com/flex/mx"
+		 width = "100%"
+		 height = "100%"
+		 xmlns:Control = "Control.*">
+	<s:layout>
+		<s:BasicLayout   />
+	</s:layout>
+	<fx:Metadata>
+			[Event(name="NormalModeClick", type="flash.events.Event")]
+			[Event(name="CloseButtonClick", type="flash.events.Event")]
+</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			protected function btnNormalMode_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent(new Event("NormalModeClick"));
+			}
+
+			protected function btnClose_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent(new Event("CloseButtonClick"));
+			}
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<Control:BorderContainerNoMinLimit top = "0"
+									   right = "0"
+									   bottom = "0"
+									   left = "0">
+		<s:HGroup right = "5"
+				  top = "3"
+				  width = "100%"
+				  horizontalAlign = "right">
+
+			<mx:TextArea id = "content"
+						 width = "100%"
+						 borderVisible = "false"
+						 text = "@laobei: 我有这样一位朋友，白天上班是刑警，晚上下班回家上网发贴，反专制，反独裁，跟5毛党辩论，精神上已经完全分裂成了两个人。他没办法挣脱这样的困局，即不能离职，也不能不听从内心对自由的召唤，看他每天这么辛苦的生活着，我觉得我也快分裂了。 ——【最後1根稻愺】"   />
+			<s:HGroup verticalAlign = "middle">
+				<s:Label id = "btnNormalMode"
+						 text = "Normal"
+						 buttonMode = "true"
+						 click = "btnNormalMode_clickHandler(event)"   />
+				<mx:LinkButton id = "btnClose"
+							   label = "x"
+							   click = "btnClose_clickHandler(event)"   />
+			</s:HGroup>
+		</s:HGroup>
+	</Control:BorderContainerNoMinLimit>
+</s:Group>

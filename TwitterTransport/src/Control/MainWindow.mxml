@@ -4,7 +4,8 @@
 			   xmlns:mx = "library://ns.adobe.com/flex/mx"
 			   width = "100%"
 			   height = "100%"
-			   skinClass = "Skins.TitleWindowSkin">
+			   skinClass = "Skins.TitleWindowSkin"
+			   creationComplete = "init();">
 	<s:layout>
 		<s:BasicLayout   />
 	</s:layout>
@@ -13,12 +14,28 @@
 			import Skins.TitleWindowSkin;
 
 			import spark.components.Button;
+			import spark.components.Label;
+			import spark.filters.BlurFilter;
 
 			[SkinPart(required="true")]
-			public var btnOption:spark.components.Button;
+			public var btnOption:Button;
+
+			[SkinPart(required="true")]
+			public var btnMiniMode:Label;
+
+			[SkinPart(required="true")]
+			public var btnMin:Label;
+
+			[SkinPart(required="true")]
+			public var btnOnTopAlways:Label;
+
+			private function init():void
+			{
+//				var blurFilter:BlurFilter = new BlurFilter;
+//				blurFilter.blurX = 10;
+//				blurFilter.blurY = 10;
+//				bg.filters = [blurFilter];
+			}
 		]]>
 	</fx:Script>
-	<fx:Declarations>
-		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
-	</fx:Declarations>
 </s:TitleWindow>

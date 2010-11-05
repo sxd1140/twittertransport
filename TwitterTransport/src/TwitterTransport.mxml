@@ -6,7 +6,9 @@
 					   height = "630"
 					   creationComplete = "init()"
 					   showStatusBar = "false"
-					   xmlns:Control = "Control.*">
+					   xmlns:Control = "Control.*"
+					   backgroundAlpha = "0"
+					   xmlns:reflexutil = "net.kandov.reflexutil.*">
 	<fx:Script>
 		<![CDATA[
 			import Class.DataEvents;
@@ -29,12 +31,16 @@
 			import mx.events.EffectEvent;
 			import mx.managers.PopUpManager;
 
+			import org.osmf.events.TimeEvent;
+
 			import spark.components.Group;
 			import spark.effects.easing.Bounce;
 
 			private var _currentOffset:int = 11;
 			private var _colorBoolean:Boolean = true;
-			private var _resizeOffset:int = 5;
+			private var _resizeEdgeOffset:int = 5;
+			private var _firstTwitterTimeStamp:Number;
+			private var _lastTwitterTimeStamp:Number;
 
 			private var app:content = new content;
 			private var CurrentTwitter:content;
@@ -58,6 +64,7 @@
 				nativeApplication.icon.bitmaps = [new trayIcon];
 
 				app.addEventListener("GetAllListCompleted", OnGetAllListCompleted_handler);
+				app.addEventListener("GetUpdateListCompleted", OnGetUpdateListCompleted_handler);
 //				app.addEventListener("AddTwitterSuccess", OnAddTwitterSuccess_handler);
 //				app.addEventListener("AddTwitterFaild", OnAddTwitterFaild_handler);
 				app.getTwitter();
@@ -68,9 +75,12 @@
 				titleAll.addEventListener(MouseEvent.MOUSE_DOWN, OnTitleAllMouseDown_handler);
 				titleAll.addEventListener(MouseEvent.MOUSE_UP, OnTitleAllMouseUp_handler);
 				titleAll.btnOption.addEventListener(MouseEvent.CLICK, OnOptionButtonClick_handler);
+				titleAll.btnMiniMode.addEventListener(MouseEvent.CLICK, OnMiniModeClick_handler);
+				titleAll.btnMin.addEventListener(MouseEvent.CLICK, OnMinClick_handler);
+				titleAll.btnOnTopAlways.addEventListener(MouseEvent.CLICK, OnOnTopAlwaysClick_handler);
 
 				loadOptionsFromLSO();
-
+				aniMiniMode.heightFrom = this.height;
 				checkForUpdate();
 			}
 
@@ -98,37 +108,37 @@
 				var x:int = event.localX;
 				var y:int = event.localY;
 
-//				if (x < _resizeOffset && y < _resizeOffset)
+//				if (x < _resizeEdgeOffset && y < _resizeEdgeOffset)
 //				{
 //					nativeWindow.startResize(NativeWindowResize.TOP_LEFT);
 //					return;
 //				}
-//				if (x > titleAll.width - _resizeOffset && y < _resizeOffset)
+//				if (x > titleAll.width - _resizeEdgeOffset && y < _resizeEdgeOffset)
 //				{
 //					nativeWindow.startResize(NativeWindowResize.TOP_RIGHT);
 //					return;
 //				}
-				if (x > titleAll.width - _resizeOffset && y > titleAll.height - 50)
+				if (x > titleAll.width - _resizeEdgeOffset && y > titleAll.height - 50)
 				{
 					nativeWindow.startResize(NativeWindowResize.BOTTOM_RIGHT);
 					return;
 				}
-				if (x < _resizeOffset && y > titleAll.height - 50)
+				if (x < _resizeEdgeOffset && y > titleAll.height - 50)
 				{
 					nativeWindow.startResize(NativeWindowResize.BOTTOM_LEFT);
 					return;
 				}
-				if (x < _resizeOffset)
+				if (x < _resizeEdgeOffset)
 				{
 					nativeWindow.startResize(NativeWindowResize.LEFT);
 					return;
 				}
-//				if (y < _resizeOffset)
+//				if (y < _resizeEdgeOffset)
 //				{
 //					nativeWindow.startResize(NativeWindowResize.TOP);
 //					return;
 //				}
-				if (x > titleAll.width - _resizeOffset)
+				if (x > titleAll.width - _resizeEdgeOffset)
 				{
 					nativeWindow.startResize(NativeWindowResize.RIGHT);
 					return;
@@ -146,7 +156,15 @@
 			{
 				if (event.target is Group && event.target.id == "moveArea")
 				{
-					aniMove.play(null, true);
+					if (aniMove.isPlaying)
+					{
+						aniMove.stop();
+						alpha = 1;
+					}
+					else
+					{
+						aniMove.play(null, true);
+					}
 				}
 			}
 
@@ -155,23 +173,48 @@
 			{
 				var allTwitter:ArrayCollection = e.result as ArrayCollection;
 				var allTwitterLength:int = allTwitter.length;
-				if (allTwitterLength > 1)
+				for (var i:int = 0; i < allTwitterLength; i++)
 				{
-					TwitterAddToUI(allTwitter);
-					PrevTwitter = allTwitter[0];
-					GetTwitterTimer.start();
+					TwitterAddToUI(allTwitter[i], false);
 				}
-				else if (allTwitterLength == 1)
+				AddLineToUI(false);
+				GetTwitterTimer.start();
+				_lastTwitterTimeStamp = allTwitter[0].ArticleTime;
+				_firstTwitterTimeStamp = allTwitter[allTwitterLength - 1].ArticleTime;
+//				if (allTwitterLength > 1)
+//				{
+//					PrevTwitter = allTwitter[0];
+//				}
+//				else if (allTwitterLength == 1)
+//				{
+//					CurrentTwitter = allTwitter[0];
+//					if (CurrentTwitter.ArticleID > PrevTwitter.ArticleID)
+//					{
+//						TwitterAddToUI(allTwitter);
+//						PrevTwitter = CurrentTwitter;
+//						trayTipWindows = new TrayTipWindow;
+//						trayTipWindows.Twitter = allTwitter[0];
+//						trayTipWindows.open();
+//					}
+//				}
+			}
+
+			//自动更新返回
+			private function OnGetUpdateListCompleted_handler(e:DataEvents):void
+			{
+				var twitters:ArrayCollection = e.result as ArrayCollection;
+				var twittersLength:int = twitters.length;
+				if (twittersLength > 0)
 				{
-					CurrentTwitter = allTwitter[0];
-					if (CurrentTwitter.ArticleID > PrevTwitter.ArticleID)
-					{
-						TwitterAddToUI(allTwitter);
-						PrevTwitter = CurrentTwitter;
-						trayTipWindows = new TrayTipWindow;
-						trayTipWindows.Twitter = allTwitter[0];
-						trayTipWindows.open();
-					}
+					AddLineToUI();
+					trayTipWindows = new TrayTipWindow;
+					trayTipWindows.Twitter = twitters[0];
+					trayTipWindows.open();
+					_lastTwitterTimeStamp = twitters[0].ArticleTime;
+				}
+				for (var i:int = twittersLength - 1; i >= 0; i--)
+				{
+					TwitterAddToUI(twitters[i]);
 				}
 			}
 
@@ -211,7 +254,7 @@
 			private function OnTimer_handler(e:TimerEvent):void
 			{
 				GetTwitterTimer.delay = Options.AutoRefreshTime * 1000;
-				app.getTwitter(0, 1);
+				app.getTwitter(10, _lastTwitterTimeStamp);
 			}
 
 //			protected function txtInput_keyUpHandler(event:KeyboardEvent):void
@@ -226,8 +269,8 @@
 			{
 				btnGetMore.enabled = false;
 				var more:content = new content;
-				more.addEventListener("GetAllListCompleted", OnGetMoreTwitterCompleted_handler);
-				more.getTwitter(_currentOffset);
+				more.addEventListener("GetUpdateListCompleted", OnGetMoreTwitterCompleted_handler);
+				more.getTwitter(10, _firstTwitterTimeStamp);
 			}
 
 			//获取更多返回
@@ -236,10 +279,41 @@
 				var data:ArrayCollection = event.result as ArrayCollection;
 				if (data.length > 0)
 				{
-					TwitterAddToUI(data);
-					_currentOffset += 10;
+					var dataLength:int = data.length;
+					for (var i:int = 0; i < dataLength; i++)
+					{
+						TwitterAddToUI(data[i], false);
+					}
+					AddLineToUI(false);
 				}
 				btnGetMore.enabled = true;
+			}
+
+			//迷你模式点击
+			private function OnMiniModeClick_handler(event:MouseEvent):void
+			{
+				aniMiniMode.play();
+				currentState = "mini";
+			}
+
+			//最小化
+			private function OnMinClick_handler(event:MouseEvent):void
+			{
+				nativeWindow.minimize();
+			}
+
+			//总在最前
+			private function OnOnTopAlwaysClick_handler(event:MouseEvent):void
+			{
+				nativeWindow.alwaysInFront = !nativeWindow.alwaysInFront;
+			}
+
+			//返回普通模式
+			private function OnNormalModeClick_handler():void
+			{
+				aniMiniMode.play(null, true);
+				currentState = "normal";
+
 			}
 
 			//设置按钮点击
@@ -266,41 +340,63 @@
 			}
 
 			//把内容写到界面中
-			private function TwitterAddToUI(val:ArrayCollection):void
-			{
-				var valLength:int = val.length;
-				for (var i:int = 0; i < valLength; i++)
-				{
-					var article:Article = new Article;
-					article.Twitter = val[i];
-					if (_colorBoolean)
-					{
-						article.BackgroupColor = Options.GapColor;
-					}
-					_colorBoolean = !_colorBoolean;
+//			private function TwitterAddToUI(val:ArrayCollection,addToUp:Boolean=true):void
+//			{
+//				var valLength:int = val.length;
+//				for (var i:int = 0; i < valLength; i++)
+//				{
+//					var article:Article = new Article;
+//					article.Twitter = val[i];
+//					if (_colorBoolean)
+//					{
+//						article.BackgroupColor = Options.GapColor;
+//					}
+//					_colorBoolean = !_colorBoolean;
+//
+//					if (addToUp)
+//					{
+//						boxMain.addElementAt(article, 0);
+//						AddLineToUI(true);
+//						return;
+//					}
+//					else
+//					{
+//						boxMain.addElement(article);
+//					}
+//				}
+//				_lastTwitterTimeStamp = val[0].ArticleTime;
+//				AddLineToUI();
+//			}
 
-					if (valLength == 1)
-					{
-						boxMain.addElementAt(article, 0);
-						AddLineToUI(true);
-						return;
-					}
-					else
-					{
-						boxMain.addElement(article);
-					}
+			private function TwitterAddToUI(val:content, addToUp:Boolean = true):void
+			{
+				var article:Article = new Article;
+				article.Twitter = val;
+				if (_colorBoolean)
+				{
+					article.BackgroupColor = Options.GapColor;
 				}
-				AddLineToUI();
+				_colorBoolean = !_colorBoolean;
+
+				if (addToUp)
+				{
+					boxMain.addElementAt(article, 0);
+				}
+				else
+				{
+					boxMain.addElement(article);
+				}
 			}
 
-			private function AddLineToUI(UP:Boolean = false):void
+			//画根分割线
+			private function AddLineToUI(UP:Boolean = true):void
 			{
 				var line:HRule = new HRule;
 				line.percentWidth = 100;
 				line.setStyle("strokeColor", 0xFF0000);
 				if (UP)
 				{
-					boxMain.addElementAt(line, 1);
+					boxMain.addElementAt(line, 0);
 				}
 				else
 				{
@@ -383,11 +479,23 @@
 					 scaleYTo = "0"   />
 		</s:Parallel>
 
+		<s:Resize id = "aniMiniMode"
+				  target = "{this}"
+				  duration = "1000"
+				  heightTo = "10"   />
+
+		<reflexutil:ReflexUtil   />
 	</fx:Declarations>
+	<s:states>
+		<s:State name = "normal"   />
+		<s:State name = "mini"   />
+	</s:states>
 	<Control:MainWindow id = "titleAll"
 						width = "100%"
 						height = "100%"
-						title = "Sxd的搬运集散地">
+						title = "Sxd的搬运集散地"
+						includeIn = "normal"
+						borderVisible = "false">
 
 
 		<s:Scroller width = "100%"
@@ -414,7 +522,8 @@
 							 text = "ctrl + 回车 发言,没什么人聊天 获取消息间隔时间改回30秒,增加发推人id着色,链接可点 着色"   />
 				</s:HGroup>
 				<s:VGroup id = "boxMain"
-						  width = "100%"   />
+						  width = "100%"
+						  gap = "0"   />
 				<s:VGroup width = "100%"
 						  horizontalAlign = "center">
 					<mx:ProgressBar id = "loadingBar"
@@ -426,9 +535,14 @@
 								   height = "30"
 								   fontSize = "19"
 								   fontWeight = "bold"
+								   visible = "false"
 								   click = "btnGetMore_clickHandler(event)"   />
 				</s:VGroup>
 			</s:VGroup>
 		</s:Scroller>
 	</Control:MainWindow>
+	<Control:MiniModeWindow id = "miniWindow"
+							includeIn = "mini"
+							CloseButtonClick = "OnTitleAllClosed_handler(null)"
+							NormalModeClick = "OnNormalModeClick_handler();"   />
 </s:WindowedApplication>

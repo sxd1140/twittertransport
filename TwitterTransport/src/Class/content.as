@@ -2,8 +2,10 @@ package Class
 {
 	import com.adobe.serialization.json.JSON;
 
+	import flash.errors.IOError;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.events.IOErrorEvent;
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
@@ -23,26 +25,38 @@ package Class
 		public var State:int;
 
 		private var BaseURL:String = "http://www.sunwenhao.com/t1/index.php/api/";
+		private var isUpdate:Boolean;
 
 		public function content()
 		{
 		}
 
-		public function getTwitter(offset:int = 0, limit:int = 10):void
+		public function getTwitter(limit:int = 10, timeStamp:Number = 0):void
 		{
-//			, timetick:Number = 0
-//			if (timetick == 0)
+//			if (timeStamp == 0)
 //			{
-//				timetick = new Date().getTime();
+//				timeStamp = new Date().getTime();
 //			}
 			var urlRequest:URLRequest = new URLRequest;
-			urlRequest.url = BaseURL + "get.list";
-			urlRequest.data = '{"offset":' + offset + ',"limit":' + limit + '}';
-//			urlRequest.data = '{"offset":' + offset + ',"limit":' + limit + ',"timetick":' + timetick + '}';
+			urlRequest.url = BaseURL + "get_list";
+//			urlRequest.data = '{"offset":' + offset + ',"limit":' + limit + '}';
+			if (timeStamp == 0)
+			{
+				urlRequest.data = 'limit=' + limit;
+				isUpdate = false;
+			}
+			else
+			{
+				urlRequest.data = 'limit=' + limit + '&timetick=' + timeStamp;
+				isUpdate = true;
+			}
+//			urlRequest.data = 'limit=' + limit;
 			urlRequest.method = URLRequestMethod.POST;
+
 			var urlLoader:URLLoader = new URLLoader;
 			urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
 			urlLoader.addEventListener(Event.COMPLETE, OnGetListCompleted_handler);
+			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, OnGetTwitterError_handler);
 			urlLoader.load(urlRequest);
 		}
 
@@ -63,13 +77,25 @@ package Class
 
 				ret.addItem(tw);
 			}
-			dispatchEvent(new DataEvents("GetAllListCompleted", ret));
+			if (isUpdate)
+			{
+				dispatchEvent(new DataEvents("GetUpdateListCompleted", ret));
+			}
+			else
+			{
+				dispatchEvent(new DataEvents("GetAllListCompleted", ret));
+			}
+		}
+
+		private function OnGetTwitterError_handler(event:IOErrorEvent):void
+		{
+
 		}
 
 		public function AddTwitter(content:String):void
 		{
 			var urlRequest:URLRequest = new URLRequest;
-			urlRequest.url = BaseURL + "insert.log";
+			urlRequest.url = BaseURL + "add";
 			urlRequest.data = '{"content":"' + content + '","agent":"Powered By Sxd"}';
 			urlRequest.method = URLRequestMethod.POST;
 			var urlLoader:URLLoader = new URLLoader;
