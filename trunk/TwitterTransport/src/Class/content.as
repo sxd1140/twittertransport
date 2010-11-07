@@ -1,7 +1,7 @@
 package Class
 {
 	import com.adobe.serialization.json.JSON;
-
+	
 	import flash.errors.IOError;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -10,7 +10,7 @@ package Class
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.net.URLRequestMethod;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.rpc.http.HTTPService;
 
@@ -31,7 +31,7 @@ package Class
 		{
 		}
 
-		public function getTwitter(limit:int = 10, timeStamp:Number = 0):void
+		public function getTwitter(limit:int = 10, timeStamp:Number = 0,direction:int=1):void
 		{
 //			if (timeStamp == 0)
 //			{
@@ -40,16 +40,16 @@ package Class
 			var urlRequest:URLRequest = new URLRequest;
 			urlRequest.url = BaseURL + "get_list";
 //			urlRequest.data = '{"offset":' + offset + ',"limit":' + limit + '}';
-			if (timeStamp == 0)
+			if (direction == 0)
 			{
-				urlRequest.data = 'limit=' + limit;
+//				urlRequest.data = 'limit=' + limit;
 				isUpdate = false;
 			}
 			else
 			{
-				urlRequest.data = 'limit=' + limit + '&timetick=' + timeStamp;
 				isUpdate = true;
 			}
+				urlRequest.data = 'limit=' + limit + '&timetick=' + timeStamp+'&direction='+direction;
 //			urlRequest.data = 'limit=' + limit;
 			urlRequest.method = URLRequestMethod.POST;
 

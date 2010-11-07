@@ -4,9 +4,9 @@ package Class
 	[Bindable]
 	public final class Options
 	{
-		static public var AutoRefreshTime:int;
-		static public var GapColor:uint;
-		static public var TipWindowShowTime:int;
+		static public var AutoRefreshTime:int=15;
+		static public var GapColor:uint = 0xAEAEAE;
+		static public var TipWindowShowTime:int=10;
 
 		public function Options()
 		{
