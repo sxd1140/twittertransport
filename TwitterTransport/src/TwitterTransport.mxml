@@ -39,8 +39,8 @@
 			private var _currentOffset:int = 11;
 			private var _colorBoolean:Boolean = true;
 			private var _resizeEdgeOffset:int = 5;
-			private var _firstTwitterTimeStamp:Number;
-			private var _lastTwitterTimeStamp:Number;
+			private var _firstTwitterTimeStamp:Number=0;
+			private var _lastTwitterTimeStamp:Number=0;
 
 			private var app:content = new content;
 			private var CurrentTwitter:content;
@@ -67,7 +67,8 @@
 				app.addEventListener("GetUpdateListCompleted", OnGetUpdateListCompleted_handler);
 //				app.addEventListener("AddTwitterSuccess", OnAddTwitterSuccess_handler);
 //				app.addEventListener("AddTwitterFaild", OnAddTwitterFaild_handler);
-				app.getTwitter();
+//				app.getTwitter();
+				btnGetMore_clickHandler(null);
 
 				GetTwitterTimer.addEventListener(TimerEvent.TIMER, OnTimer_handler);
 
@@ -75,97 +76,13 @@
 				titleAll.addEventListener(MouseEvent.MOUSE_DOWN, OnTitleAllMouseDown_handler);
 				titleAll.addEventListener(MouseEvent.MOUSE_UP, OnTitleAllMouseUp_handler);
 				titleAll.btnOption.addEventListener(MouseEvent.CLICK, OnOptionButtonClick_handler);
-				titleAll.btnMiniMode.addEventListener(MouseEvent.CLICK, OnMiniModeClick_handler);
+//				titleAll.btnMiniMode.addEventListener(MouseEvent.CLICK, OnMiniModeClick_handler);
 				titleAll.btnMin.addEventListener(MouseEvent.CLICK, OnMinClick_handler);
 				titleAll.btnOnTopAlways.addEventListener(MouseEvent.CLICK, OnOnTopAlwaysClick_handler);
 
 				loadOptionsFromLSO();
-				aniMiniMode.heightFrom = this.height;
+//				aniMiniMode.heightFrom = this.height;
 				checkForUpdate();
-			}
-
-			//关闭事件
-			private function OnTitleAllClosed_handler(event:CloseEvent):void
-			{
-				aniClose.play();
-			}
-
-			//鼠标按下
-			private function OnTitleAllMouseDown_handler(event:MouseEvent):void
-			{
-				if (event.target is Group && event.target.id == "moveArea")
-				{
-					nativeWindow.startMove();
-					aniMove.play();
-					return;
-				}
-
-				if (event.target is LinkButton || event.target is Button)
-				{
-					return;
-				}
-
-				var x:int = event.localX;
-				var y:int = event.localY;
-
-//				if (x < _resizeEdgeOffset && y < _resizeEdgeOffset)
-//				{
-//					nativeWindow.startResize(NativeWindowResize.TOP_LEFT);
-//					return;
-//				}
-//				if (x > titleAll.width - _resizeEdgeOffset && y < _resizeEdgeOffset)
-//				{
-//					nativeWindow.startResize(NativeWindowResize.TOP_RIGHT);
-//					return;
-//				}
-				if (x > titleAll.width - _resizeEdgeOffset && y > titleAll.height - 50)
-				{
-					nativeWindow.startResize(NativeWindowResize.BOTTOM_RIGHT);
-					return;
-				}
-				if (x < _resizeEdgeOffset && y > titleAll.height - 50)
-				{
-					nativeWindow.startResize(NativeWindowResize.BOTTOM_LEFT);
-					return;
-				}
-				if (x < _resizeEdgeOffset)
-				{
-					nativeWindow.startResize(NativeWindowResize.LEFT);
-					return;
-				}
-//				if (y < _resizeEdgeOffset)
-//				{
-//					nativeWindow.startResize(NativeWindowResize.TOP);
-//					return;
-//				}
-				if (x > titleAll.width - _resizeEdgeOffset)
-				{
-					nativeWindow.startResize(NativeWindowResize.RIGHT);
-					return;
-				}
-				if (y > titleAll.height - 50)
-				{
-					nativeWindow.startResize(NativeWindowResize.BOTTOM);
-					return;
-				}
-
-			}
-
-			//鼠标抬起
-			private function OnTitleAllMouseUp_handler(event:MouseEvent):void
-			{
-				if (event.target is Group && event.target.id == "moveArea")
-				{
-					if (aniMove.isPlaying)
-					{
-						aniMove.stop();
-						alpha = 1;
-					}
-					else
-					{
-						aniMove.play(null, true);
-					}
-				}
 			}
 
 			//获取数据返回
@@ -178,9 +95,13 @@
 					TwitterAddToUI(allTwitter[i], false);
 				}
 				AddLineToUI(false);
-				GetTwitterTimer.start();
-				_lastTwitterTimeStamp = allTwitter[0].ArticleTime;
+				if (_lastTwitterTimeStamp==0)
+				{
+					_lastTwitterTimeStamp = allTwitter[0].ArticleTime;
+				}
 				_firstTwitterTimeStamp = allTwitter[allTwitterLength - 1].ArticleTime;
+				btnGetMore.enabled = true;
+				GetTwitterTimer.start();
 //				if (allTwitterLength > 1)
 //				{
 //					PrevTwitter = allTwitter[0];
@@ -198,7 +119,14 @@
 //					}
 //				}
 			}
-
+			
+			//自动更新
+			private function OnTimer_handler(e:TimerEvent):void
+			{
+				GetTwitterTimer.delay = Options.AutoRefreshTime * 1000;
+				app.getTwitter(10, _lastTwitterTimeStamp);
+			}
+			
 			//自动更新返回
 			private function OnGetUpdateListCompleted_handler(e:DataEvents):void
 			{
@@ -250,12 +178,6 @@
 //				var reg:RegExp = /"/g;
 //				return content.replace(reg, '\\"');
 //			}
-			//自动刷新
-			private function OnTimer_handler(e:TimerEvent):void
-			{
-				GetTwitterTimer.delay = Options.AutoRefreshTime * 1000;
-				app.getTwitter(10, _lastTwitterTimeStamp);
-			}
 
 //			protected function txtInput_keyUpHandler(event:KeyboardEvent):void
 //			{
@@ -268,9 +190,9 @@
 			protected function btnGetMore_clickHandler(event:MouseEvent):void
 			{
 				btnGetMore.enabled = false;
-				var more:content = new content;
-				more.addEventListener("GetUpdateListCompleted", OnGetMoreTwitterCompleted_handler);
-				more.getTwitter(10, _firstTwitterTimeStamp);
+//				var more:content = new content;
+//				more.addEventListener("GetUpdateListCompleted", OnGetMoreTwitterCompleted_handler);
+				app.getTwitter(10, _firstTwitterTimeStamp,0);
 			}
 
 			//获取更多返回
@@ -290,10 +212,94 @@
 			}
 
 			//迷你模式点击
-			private function OnMiniModeClick_handler(event:MouseEvent):void
+//			private function OnMiniModeClick_handler(event:MouseEvent):void
+//			{
+//				aniMiniMode.play();
+//				currentState = "mini";
+//			}
+			
+			//关闭事件
+			private function OnTitleAllClosed_handler(event:CloseEvent):void
 			{
-				aniMiniMode.play();
-				currentState = "mini";
+				aniClose.play();
+			}
+			
+			//鼠标按下
+			private function OnTitleAllMouseDown_handler(event:MouseEvent):void
+			{
+				if (event.target is Group && event.target.id == "moveArea")
+				{
+					nativeWindow.startMove();
+					aniMove.play();
+					return;
+				}
+				
+				if (event.target is LinkButton || event.target is Button)
+				{
+					return;
+				}
+				
+				var x:int = event.localX;
+				var y:int = event.localY;
+				
+				//				if (x < _resizeEdgeOffset && y < _resizeEdgeOffset)
+				//				{
+				//					nativeWindow.startResize(NativeWindowResize.TOP_LEFT);
+				//					return;
+				//				}
+				//				if (x > titleAll.width - _resizeEdgeOffset && y < _resizeEdgeOffset)
+				//				{
+				//					nativeWindow.startResize(NativeWindowResize.TOP_RIGHT);
+				//					return;
+				//				}
+				if (x > titleAll.width - _resizeEdgeOffset && y > titleAll.height - 50)
+				{
+					nativeWindow.startResize(NativeWindowResize.BOTTOM_RIGHT);
+					return;
+				}
+				if (x < _resizeEdgeOffset && y > titleAll.height - 50)
+				{
+					nativeWindow.startResize(NativeWindowResize.BOTTOM_LEFT);
+					return;
+				}
+				if (x < _resizeEdgeOffset)
+				{
+					nativeWindow.startResize(NativeWindowResize.LEFT);
+					return;
+				}
+				//				if (y < _resizeEdgeOffset)
+				//				{
+				//					nativeWindow.startResize(NativeWindowResize.TOP);
+				//					return;
+				//				}
+				if (x > titleAll.width - _resizeEdgeOffset)
+				{
+					nativeWindow.startResize(NativeWindowResize.RIGHT);
+					return;
+				}
+				if (y > titleAll.height - 50)
+				{
+					nativeWindow.startResize(NativeWindowResize.BOTTOM);
+					return;
+				}
+				
+			}
+			
+			//鼠标抬起
+			private function OnTitleAllMouseUp_handler(event:MouseEvent):void
+			{
+				if (event.target is Group && event.target.id == "moveArea")
+				{
+					if (aniMove.isPlaying)
+					{
+						aniMove.stop();
+						alpha = 1;
+					}
+					else
+					{
+						aniMove.play(null, true);
+					}
+				}
 			}
 
 			//最小化
@@ -410,9 +416,9 @@
 				MySO = SharedObject.getLocal("TwitterTransportOptions");
 				if (MySO.data.AutoRefreshTime == undefined)
 				{
-					Options.AutoRefreshTime = 15;
-					Options.GapColor = 0xAEAEAE;
-					Options.TipWindowShowTime = 10;
+//					Options.AutoRefreshTime = 15;
+//					Options.GapColor = 0xAEAEAE;
+//					Options.TipWindowShowTime = 10;
 				}
 				else
 				{
@@ -535,7 +541,6 @@
 								   height = "30"
 								   fontSize = "19"
 								   fontWeight = "bold"
-								   visible = "false"
 								   click = "btnGetMore_clickHandler(event)"   />
 				</s:VGroup>
 			</s:VGroup>
