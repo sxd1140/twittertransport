@@ -8,11 +8,9 @@ package Class
 		public var result:Object; //数据返回结果
 		public var tag:Object;
 
-		public function DataEvents(s:String, ret:Object,bubbles=false)
+		public function DataEvents(s:String, ret:Object, bubbles:Boolean = false)
 		{
-
-			super(s,bubbles); //如果在构造时不设bubbles，默认是false，也就是不能传递的。
-
+			super(s, bubbles); //如果在构造时不设bubbles，默认是false，也就是不能传递的。
 			eventInfo = "这个事件是:" + s;
 			result = ret;
 		}

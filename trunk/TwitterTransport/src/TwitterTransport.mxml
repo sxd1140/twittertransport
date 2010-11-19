@@ -2,8 +2,8 @@
 <s:WindowedApplication xmlns:fx = "http://ns.adobe.com/mxml/2009"
 					   xmlns:s = "library://ns.adobe.com/flex/spark"
 					   xmlns:mx = "library://ns.adobe.com/flex/mx"
-					   width = "590"
-					   height = "630"
+					   width = "610"
+					   height = "650"
 					   creationComplete = "init()"
 					   showStatusBar = "false"
 					   xmlns:Control = "Control.*"
@@ -36,11 +36,11 @@
 			import spark.components.Group;
 			import spark.effects.easing.Bounce;
 
-			private var _currentOffset:int = 11;
+//			private var _currentOffset:int = 11;
 			private var _colorBoolean:Boolean = true;
 			private var _resizeEdgeOffset:int = 5;
-			private var _firstTwitterTimeStamp:Number=0;
-			private var _lastTwitterTimeStamp:Number=0;
+			private var _firstTwitterTimeStamp:Number = 0;
+			private var _lastTwitterTimeStamp:Number = 0;
 
 			private var app:content = new content;
 			private var CurrentTwitter:content;
@@ -95,7 +95,7 @@
 					TwitterAddToUI(allTwitter[i], false);
 				}
 				AddLineToUI(false);
-				if (_lastTwitterTimeStamp==0)
+				if (_lastTwitterTimeStamp == 0)
 				{
 					_lastTwitterTimeStamp = allTwitter[0].ArticleTime;
 				}
@@ -119,14 +119,14 @@
 //					}
 //				}
 			}
-			
+
 			//自动更新
 			private function OnTimer_handler(e:TimerEvent):void
 			{
 				GetTwitterTimer.delay = Options.AutoRefreshTime * 1000;
 				app.getTwitter(10, _lastTwitterTimeStamp);
 			}
-			
+
 			//自动更新返回
 			private function OnGetUpdateListCompleted_handler(e:DataEvents):void
 			{
@@ -192,7 +192,7 @@
 				btnGetMore.enabled = false;
 //				var more:content = new content;
 //				more.addEventListener("GetUpdateListCompleted", OnGetMoreTwitterCompleted_handler);
-				app.getTwitter(10, _firstTwitterTimeStamp,0);
+				app.getTwitter(10, _firstTwitterTimeStamp, 0);
 			}
 
 			//获取更多返回
@@ -217,13 +217,13 @@
 //				aniMiniMode.play();
 //				currentState = "mini";
 //			}
-			
+
 			//关闭事件
 			private function OnTitleAllClosed_handler(event:CloseEvent):void
 			{
 				aniClose.play();
 			}
-			
+
 			//鼠标按下
 			private function OnTitleAllMouseDown_handler(event:MouseEvent):void
 			{
@@ -233,15 +233,15 @@
 					aniMove.play();
 					return;
 				}
-				
+
 				if (event.target is LinkButton || event.target is Button)
 				{
 					return;
 				}
-				
+
 				var x:int = event.localX;
 				var y:int = event.localY;
-				
+
 				//				if (x < _resizeEdgeOffset && y < _resizeEdgeOffset)
 				//				{
 				//					nativeWindow.startResize(NativeWindowResize.TOP_LEFT);
@@ -282,9 +282,9 @@
 					nativeWindow.startResize(NativeWindowResize.BOTTOM);
 					return;
 				}
-				
+
 			}
-			
+
 			//鼠标抬起
 			private function OnTitleAllMouseUp_handler(event:MouseEvent):void
 			{
@@ -414,13 +414,7 @@
 			private function loadOptionsFromLSO():void
 			{
 				MySO = SharedObject.getLocal("TwitterTransportOptions");
-				if (MySO.data.AutoRefreshTime == undefined)
-				{
-//					Options.AutoRefreshTime = 15;
-//					Options.GapColor = 0xAEAEAE;
-//					Options.TipWindowShowTime = 10;
-				}
-				else
+				if (MySO.data.AutoRefreshTime != undefined)
 				{
 					Options.AutoRefreshTime = MySO.data.AutoRefreshTime;
 					Options.GapColor = MySO.data.GapColor;
@@ -496,14 +490,17 @@
 		<s:State name = "normal"   />
 		<s:State name = "mini"   />
 	</s:states>
+
 	<Control:MainWindow id = "titleAll"
-						width = "100%"
-						height = "100%"
+						left = "20"
+						right = "20"
+						top = "20"
+						bottom = "20"
 						title = "Sxd的搬运集散地"
-						includeIn = "normal"
-						borderVisible = "false">
-
-
+						includeIn = "normal">
+		<!--<Control:filters>
+			 <s:DropShadowFilter distance = "10"   />
+			 </Control:filters>-->
 		<s:Scroller width = "100%"
 					height = "100%">
 			<s:VGroup width = "100%"

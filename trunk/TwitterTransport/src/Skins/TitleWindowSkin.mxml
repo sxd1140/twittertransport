@@ -141,11 +141,11 @@
 
 	<!--- drop shadow can't be hittable so it stays sibling of other graphics @private-->
 	<s:RectangularDropShadow id = "dropShadow"
-							 blurX = "20"
-							 blurY = "20"
-							 alpha = "0.32"
+							 blurX = "10"
+							 blurY = "10"
+							 alpha = "1"
 							 alpha.inactiveGroup = "0.22"
-							 distance = "11"
+							 distance = "3"
 							 distance.inactiveGroup = "7"
 							 angle = "90"
 							 color = "0x000000"
@@ -161,10 +161,10 @@
 			 bottom = "0">
 
 		<!--- top group mask @private-->
-		<s:Group left = "1"
-				 top = "1"
-				 right = "1"
-				 bottom = "1"
+		<s:Group left = "0"
+				 top = "0"
+				 right = "0"
+				 bottom = "0"
 				 id = "topGroupMask">
 
 			<!--- @private-->
@@ -226,22 +226,6 @@
 							  color = "#FFFFFF"   />
 			</s:fill>
 		</s:Rect>
-
-		<!--<s:BorderContainer id = "glassLayer"
-			 left = "1"
-			 top = "1"
-			 right = "1"
-			 bottom = "1"
-			 borderVisible = "false">
-			 <s:filters>
-			 <s:GlowFilter blurX = "500"
-			 blurY = "500"
-			 color = "0xFFFFFF"
-			 inner = "true"   />
-			 <s:BlurFilter blurX = "500"
-			 blurY = "500"   />
-			 </s:filters>
-			 </s:BorderContainer>-->
 
 		<!-- layer 3: contents -->
 		<!--- Contains the vertical stack of title bar content and control bar. -->

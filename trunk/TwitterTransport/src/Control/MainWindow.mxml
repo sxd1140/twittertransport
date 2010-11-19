@@ -5,7 +5,7 @@
 			   width = "100%"
 			   height = "100%"
 			   skinClass = "Skins.TitleWindowSkin"
-			   creationComplete = "init();">
+			   borderVisible = "false">
 	<s:layout>
 		<s:BasicLayout   />
 	</s:layout>
@@ -15,7 +15,6 @@
 
 			import spark.components.Button;
 			import spark.components.Label;
-			import spark.filters.BlurFilter;
 
 			[SkinPart(required="true")]
 			public var btnOption:Button;
@@ -28,14 +27,6 @@
 
 			[SkinPart(required="true")]
 			public var btnOnTopAlways:Label;
-
-			private function init():void
-			{
-//				var blurFilter:BlurFilter = new BlurFilter;
-//				blurFilter.blurX = 10;
-//				blurFilter.blurY = 10;
-//				bg.filters = [blurFilter];
-			}
 		]]>
 	</fx:Script>
 </s:TitleWindow>
